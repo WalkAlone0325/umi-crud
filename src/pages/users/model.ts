@@ -39,7 +39,7 @@ const UserModel: UserModelType = {
     data: [],
     meta: {
       total: 0,
-      per_page: 10,
+      per_page: 5,
       page: 1
     }
   },
@@ -64,7 +64,7 @@ const UserModel: UserModelType = {
       const data = yield call(editRecord, { id, values })
       if (data) {
         message.success('Edit Successfully.')
-        const { page, per_page } = yield select((state) => state.users.meta)
+        const { page, per_page } = yield select((state: any) => state.users.meta)
         yield put({
           type: 'getRemote',
           payload: { page, per_page }
@@ -77,7 +77,7 @@ const UserModel: UserModelType = {
       const data = yield call(deleteRecord, payload)
       if (data) {
         message.success('Delete Successully.')
-        const { page, per_page } = yield select((state) => state.users.meta)
+        const { page, per_page } = yield select((state: any) => state.users.meta)
         yield put({
           type: 'getRemote',
           payload: { page, per_page }
@@ -90,7 +90,7 @@ const UserModel: UserModelType = {
       const data = yield call(addRecord, { values })
       if (data) {
         message.success('Add Successfully.')
-        const { page, per_page } = yield select((state) => state.users.meta)
+        const { page, per_page } = yield select((state: any) => state.users.meta)
         yield put({
           type: 'getRemote',
           payload: { page, per_page }
@@ -115,7 +115,12 @@ const UserModel: UserModelType = {
     setup({ dispatch, history }) {
       return history.listen(({ pathname }) => {
         if (pathname === '/users') {
-          // dispatch({ type: 'getRemote' })
+          dispatch({
+            type: 'getRemote', payload: {
+              page: 1,
+              per_page: 5
+            }
+          })
         }
       })
     }

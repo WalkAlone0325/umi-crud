@@ -11,12 +11,14 @@ const errorHandler = function (err: any) {
   } else {
     message.error('Network Error')
   }
+
+  throw Error
 }
 
 const extendRequest = extend({ errorHandler })
 
 
-export const getRemoteList = async ({ page, per_page }) => {
+export const getRemoteList = async ({ page, per_page }: { page: number, per_page: number }) => {
   return extendRequest(`http://public-api-v1.aspirantzhang.com/users?page=${page}&per_page=${per_page}`, {
     method: 'get'
   })

@@ -1,5 +1,5 @@
 import React, { FC, useRef, useState } from 'react';
-import { Table, Space, Button, Popconfirm } from 'antd';
+import { Table, Space, Button, Popconfirm, Pagination } from 'antd';
 import 'antd/dist/antd.css';
 import { connect, Dispatch, Loading, UserState } from 'umi';
 import ProTable, {
@@ -108,20 +108,43 @@ const UserListPage: FC<UserPageProps> = ({
     setRecord(undefined);
   };
 
-  const requestHandler = async ({ pageSize, current }) => {
-    const users = await getRemoteList({
-      page: current,
-      per_page: pageSize,
-    });
-    return {
-      data: users.data,
-      success: true,
-      total: users.meta.total,
-    };
-  };
+  // const requestHandler = async ({ pageSize, current }) => {
+  //   console.log(pageSize, current);
+  //   const users = await getRemoteList({
+  //     page: current,
+  //     per_page: pageSize,
+  //   });
+  //   // 翻页获取不到时
+  //   if (users) {
+  //     return {
+  //       data: users.data,
+  //       success: true,
+  //       total: users.meta.total,
+  //     };
+  //   } else {
+  //     return {
+  //       data: [],
+  //     };
+  //   }
+  // };
 
   const reloadHanlder = () => {
     ref.current?.reload();
+  };
+
+  const paginationHandler = (page: number, pageSize: number | undefined) => {
+    console.log(page, pageSize);
+    dispatch({
+      type: 'users/getRemote',
+      payload: { page, per_page: pageSize },
+    });
+  };
+
+  const pageSizeHandler = (current: number, size: number) => {
+    dispatch({
+      type: 'users/getRemote',
+      payload: { page: current, per_page: size },
+    });
   };
 
   return (
@@ -135,9 +158,21 @@ const UserListPage: FC<UserPageProps> = ({
         dataSource={users.data}
         rowKey="id"
         loading={usersListLoading}
-        request={requestHandler}
+        // request={requestHandler}
         search={false}
         actionRef={ref}
+        pagination={false}
+      />
+      <Pagination
+        className="list-page"
+        total={users.meta.total}
+        current={users.meta.page}
+        pageSize={users.meta.per_page}
+        onChange={paginationHandler}
+        onShowSizeChange={pageSizeHandler}
+        showSizeChanger
+        showQuickJumper
+        showTotal={total => `Total ${total} items`}
       />
       {/* <Table
         columns={columns}

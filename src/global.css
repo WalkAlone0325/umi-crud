@@ -6,3 +6,8 @@
   border-radius: 3px;
   padding: 10px;
 }
+
+.list-page {
+  text-align: right;
+  padding-top: 10px;
+}
