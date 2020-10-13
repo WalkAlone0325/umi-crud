@@ -1,12 +1,14 @@
 import React, { FC, useEffect } from 'react';
-import { Modal, Form, Input } from 'antd';
+import { Modal, Form, Input, DatePicker, Switch } from 'antd';
 import { UserItem, FormValues } from '../data.d';
+import moment from 'moment';
 
 interface UserModalProps {
   visible: boolean;
   closeHandler: () => void;
   record: UserItem | undefined;
   onFinish: (values: FormValues) => void;
+  confirmLoading: boolean;
 }
 
 const UserModal: FC<UserModalProps> = props => {
@@ -20,7 +22,14 @@ const UserModal: FC<UserModalProps> = props => {
       form.resetFields();
     } else {
       // 编辑时
-      form.setFieldsValue(record);
+      form.setFieldsValue({
+        ...record,
+        // c处理日期格式
+        create_time: moment(record.create_time),
+        // 处理 status
+        // status: record.status === 1 ? true : false,
+        status: Boolean(record.status),
+      });
     }
   }, [visible]);
 
@@ -47,6 +56,7 @@ const UserModal: FC<UserModalProps> = props => {
           form={form}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
+          initialValues={{ status: true }}
         >
           <Form.Item
             label="Name"
@@ -59,10 +69,10 @@ const UserModal: FC<UserModalProps> = props => {
             <Input />
           </Form.Item>
           <Form.Item label="Create Time" name="create_time">
-            <Input />
+            <DatePicker showTime />
           </Form.Item>
-          <Form.Item label="Status" name="status">
-            <Input />
+          <Form.Item label="Status" name="status" valuePropName="checked">
+            <Switch />
           </Form.Item>
         </Form>
       </Modal>

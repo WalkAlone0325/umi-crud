@@ -2,7 +2,11 @@ import React, { FC, useRef, useState } from 'react';
 import { Table, Space, Button, Popconfirm, Pagination, message } from 'antd';
 import 'antd/dist/antd.css';
 import { connect, Dispatch, Loading, UserState } from 'umi';
-import ProTable, { ProColumns, TableDropdown } from '@ant-design/pro-table';
+import ProTable, {
+  ProColumns,
+  TableDropdown,
+  ActionType,
+} from '@ant-design/pro-table';
 import UserModal from './components/UserModal';
 import { FormValues, UserItem } from './data.d';
 import { addRecord, editRecord } from './service';
@@ -11,12 +15,6 @@ interface UserPageProps {
   users: UserState;
   dispatch: Dispatch;
   usersListLoading: boolean;
-}
-
-interface ActionType {
-  reload: () => void;
-  fetchMore: () => void;
-  reset: () => void;
 }
 
 const UserListPage: FC<UserPageProps> = ({
@@ -29,41 +27,44 @@ const UserListPage: FC<UserPageProps> = ({
   const [record, setRecord] = useState<UserItem | undefined>(undefined);
   const ref = useRef<ActionType>();
 
-  const columns = [
+  const columns: ProColumns<UserItem>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
+      valueType: 'digit',
       key: 'id',
     },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      render: (text: string) => <a>{text}</a>,
+      valueType: 'text',
+      render: (text: any) => <a>{text}</a>,
     },
     {
       title: 'Create Time',
       dataIndex: 'create_time',
       key: 'create_time',
+      valueType: 'dateTime',
     },
     {
       title: 'Action',
       key: 'action',
-      render: (text: string, record: UserItem) => (
-        <Space size="middle">
-          <Button type="primary" onClick={() => editHandler(record)}>
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure delete this user?"
-            onConfirm={() => deleteHandler(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="dashed">Delete</Button>
-          </Popconfirm>
-        </Space>
-      ),
+      valueType: 'option',
+      render: (text: any, record: UserItem) => [
+        <Button type="primary" onClick={() => editHandler(record)} key="key">
+          Edit
+        </Button>,
+        <Popconfirm
+          title="Are you sure delete this user?"
+          onConfirm={() => deleteHandler(record.id)}
+          okText="Yes"
+          cancelText="No"
+          key="key"
+        >
+          <Button type="dashed">Delete</Button>
+        </Popconfirm>,
+      ],
     },
   ];
 
@@ -101,13 +102,7 @@ const UserListPage: FC<UserPageProps> = ({
     const result = await serviceFun({ id, values });
     if (result) {
       setMadalVisible(false);
-      dispatch({
-        type: 'users/getRemote',
-        payload: {
-          page: users.meta.page,
-          per_page: users.meta.per_page,
-        },
-      });
+      resetHandler();
       setConfirmLoading(false);
     } else {
       setConfirmLoading(false);
@@ -141,8 +136,14 @@ const UserListPage: FC<UserPageProps> = ({
   //   }
   // };
 
-  const reloadHanlder = () => {
-    ref.current?.reload();
+  const resetHandler = () => {
+    dispatch({
+      type: 'users/getRemote',
+      payload: {
+        page: users.meta.page,
+        per_page: users.meta.per_page,
+      },
+    });
   };
 
   const paginationHandler = (page: number, pageSize: number | undefined) => {
@@ -162,10 +163,6 @@ const UserListPage: FC<UserPageProps> = ({
 
   return (
     <div className="list-table">
-      <Button type="primary" onClick={addHanlder}>
-        Add
-      </Button>
-      <Button onClick={reloadHanlder}>Reload</Button>
       <ProTable
         columns={columns}
         dataSource={users.data}
@@ -173,8 +170,24 @@ const UserListPage: FC<UserPageProps> = ({
         loading={usersListLoading}
         // request={requestHandler}
         search={false}
-        actionRef={ref}
         pagination={false}
+        options={{
+          density: true,
+          fullScreen: true,
+          reload: () => {
+            resetHandler();
+          },
+          setting: true,
+        }}
+        headerTitle="User List"
+        toolBarRender={() => [
+          <Button type="primary" onClick={addHanlder} key="1">
+            Add
+          </Button>,
+          <Button onClick={resetHandler} key="2">
+            Reload
+          </Button>,
+        ]}
       />
       <Pagination
         className="list-page"
