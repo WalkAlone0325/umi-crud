@@ -1,15 +1,11 @@
 import React, { FC, useRef, useState } from 'react';
-import { Table, Space, Button, Popconfirm, Pagination } from 'antd';
+import { Table, Space, Button, Popconfirm, Pagination, message } from 'antd';
 import 'antd/dist/antd.css';
 import { connect, Dispatch, Loading, UserState } from 'umi';
-import ProTable, {
-  ProColumns,
-  TableDropdown,
-  ActionType,
-} from '@ant-design/pro-table';
+import ProTable, { ProColumns, TableDropdown } from '@ant-design/pro-table';
 import UserModal from './components/UserModal';
 import { FormValues, UserItem } from './data.d';
-import { getRemoteList } from './service';
+import { addRecord, editRecord } from './service';
 
 interface UserPageProps {
   users: UserState;
@@ -29,6 +25,7 @@ const UserListPage: FC<UserPageProps> = ({
   usersListLoading,
 }) => {
   const [madalVisible, setMadalVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const [record, setRecord] = useState<UserItem | undefined>(undefined);
   const ref = useRef<ActionType>();
 
@@ -86,20 +83,36 @@ const UserListPage: FC<UserPageProps> = ({
   };
 
   // 同时做 edit 编辑页提交 和 add 添加 （id 有没有的区别）
-  const onFinish = (values: FormValues) => {
+  const onFinish = async (values: FormValues) => {
+    setConfirmLoading(true);
     let id = 0;
     if (record) {
       // 传id
       id = record.id;
     }
 
+    let serviceFun;
     if (id) {
-      dispatch({ type: 'users/edit', payload: { id, values } });
-      // console.log('Success:', values);
+      serviceFun = editRecord;
     } else {
-      dispatch({ type: 'users/add', payload: { values } });
+      serviceFun = addRecord;
     }
-    setMadalVisible(false);
+
+    const result = await serviceFun({ id, values });
+    if (result) {
+      setMadalVisible(false);
+      dispatch({
+        type: 'users/getRemote',
+        payload: {
+          page: users.meta.page,
+          per_page: users.meta.per_page,
+        },
+      });
+      setConfirmLoading(false);
+    } else {
+      setConfirmLoading(false);
+      message.error(`${id === 0 ? 'Add' : 'Edit'} Failed.`);
+    }
   };
 
   const addHanlder = () => {
@@ -185,6 +198,7 @@ const UserListPage: FC<UserPageProps> = ({
         closeHandler={closeHandler}
         record={record}
         onFinish={onFinish}
+        confirmLoading={confirmLoading}
       />
     </div>
   );
