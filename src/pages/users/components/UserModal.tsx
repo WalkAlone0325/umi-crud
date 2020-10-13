@@ -11,6 +11,11 @@ interface UserModalProps {
   confirmLoading: boolean;
 }
 
+const layout = {
+  labelCol: { span: 4 },
+  wrapperCol: { span: 20 },
+};
+
 const UserModal: FC<UserModalProps> = props => {
   const { visible, closeHandler, record, onFinish, confirmLoading } = props;
   const [form] = Form.useForm();
@@ -44,7 +49,7 @@ const UserModal: FC<UserModalProps> = props => {
   return (
     <div>
       <Modal
-        title="Basic Mado"
+        title={record ? `Edit ID: ${record.id}` : 'Add'}
         visible={visible}
         onOk={onOk}
         onCancel={closeHandler}
@@ -52,6 +57,7 @@ const UserModal: FC<UserModalProps> = props => {
         confirmLoading={confirmLoading}
       >
         <Form
+          {...layout}
           name="basic"
           form={form}
           onFinish={onFinish}
