@@ -9,11 +9,11 @@ export default defineConfig({
   // { path: '/', component: '@/pages/index' },
   // ],
   // 代理
-  proxy: {
-    '/api': {
-      'target': 'http://public-api-v1.aspirantzhang.com',
-      'changeOrigin': true,
-      'pathRewrite': { '^/api': '' },
-    },
-  },
+  // proxy: {
+  //   '/api': {
+  //     'target': 'http://public-api-v1.aspirantzhang.com',
+  //     'changeOrigin': true,
+  //     'pathRewrite': { '^/api': '' },
+  //   },
+  // },
 });

@@ -16,8 +16,8 @@ const errorHandler = function (err: any) {
 const extendRequest = extend({ errorHandler })
 
 
-export const getRemoteList = async () => {
-  return extendRequest('/api/users', {
+export const getRemoteList = async ({ page, per_page }) => {
+  return extendRequest(`http://public-api-v1.aspirantzhang.com/users?page=${page}&per_page=${per_page}`, {
     method: 'get'
   })
     .then((res) => { return res })
@@ -25,7 +25,7 @@ export const getRemoteList = async () => {
 }
 
 export const editRecord = async ({ id, values }: { id: number, values: FormValues }) => {
-  return extendRequest(`/api/users/${id}`, {
+  return extendRequest(`http://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'put',
     data: values
   })
@@ -34,7 +34,7 @@ export const editRecord = async ({ id, values }: { id: number, values: FormValue
 }
 
 export const deleteRecord = async (id: number) => {
-  return extendRequest(`/api/users/${id}`, {
+  return extendRequest(`http://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'delete',
   })
     .then((res) => { return true })
@@ -42,7 +42,7 @@ export const deleteRecord = async (id: number) => {
 }
 
 export const addRecord = async ({ values }: { values: FormValues }) => {
-  return extendRequest(`/api/users/`, {
+  return extendRequest(`http://public-api-v1.aspirantzhang.com/users/`, {
     method: 'post',
     data: values
   })

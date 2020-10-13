@@ -39,7 +39,7 @@ const UserModel: UserModelType = {
     data: [],
     meta: {
       total: 0,
-      per_page: 5,
+      per_page: 10,
       page: 1
     }
   },
@@ -54,35 +54,47 @@ const UserModel: UserModelType = {
   // 异步
   effects: {
     // / *getList (action,effects) {yield put(xx)}
-    *getRemote(action, { put, call }) {
-      const data = yield call(getRemoteList)
+    *getRemote({ payload: { page, per_page } }, { put, call }) {
+      const data = yield call(getRemoteList, { page, per_page })
       if (data) {
         yield put({ type: 'getList', payload: data })
       }
     },
-    *edit({ payload: { id, values } }, { put, call }) {
+    *edit({ payload: { id, values } }, { put, call, select }) {
       const data = yield call(editRecord, { id, values })
       if (data) {
         message.success('Edit Successfully.')
-        yield put({ type: 'getRemote' })
+        const { page, per_page } = yield select((state) => state.users.meta)
+        yield put({
+          type: 'getRemote',
+          payload: { page, per_page }
+        })
       } else {
         message.error('Edit Failed')
       }
     },
-    *delete({ payload }, { put, call }) {
+    *delete({ payload }, { put, call, select }) {
       const data = yield call(deleteRecord, payload)
       if (data) {
         message.success('Delete Successully.')
-        yield put({ type: 'getRemote' })
+        const { page, per_page } = yield select((state) => state.users.meta)
+        yield put({
+          type: 'getRemote',
+          payload: { page, per_page }
+        })
       } else {
         message.error('Delete Failed')
       }
     },
-    *add({ payload: { values } }, { put, call }) {
+    *add({ payload: { values } }, { put, call, select }) {
       const data = yield call(addRecord, { values })
       if (data) {
         message.success('Add Successfully.')
-        yield put({ type: 'getRemote' })
+        const { page, per_page } = yield select((state) => state.users.meta)
+        yield put({
+          type: 'getRemote',
+          payload: { page, per_page }
+        })
       } else {
         message.error('Add Failed')
       }
@@ -103,7 +115,7 @@ const UserModel: UserModelType = {
     setup({ dispatch, history }) {
       return history.listen(({ pathname }) => {
         if (pathname === '/users') {
-          dispatch({ type: 'getRemote' })
+          // dispatch({ type: 'getRemote' })
         }
       })
     }
